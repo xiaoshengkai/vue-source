@@ -67,6 +67,7 @@ function buildEntry (config) {
 function write (dest, code, zip) {
   return new Promise((resolve, reject) => {
     function report (extra) {
+      console.log('我特么...')
       console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
       resolve()
     }
