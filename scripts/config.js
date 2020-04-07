@@ -214,7 +214,9 @@ const builds = {
 }
 
 function genConfig (name) {
+  // 对应平台配置
   const opts = builds[name]
+  // 处理成真正能被rollup使用的配置
   const config = {
     input: opts.entry,
     external: opts.external,
@@ -255,6 +257,7 @@ function genConfig (name) {
     config.plugins.push(buble())
   }
 
+  // 访问config _name 就是访问name属性
   Object.defineProperty(config, '_name', {
     enumerable: false,
     value: name

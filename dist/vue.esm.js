@@ -5077,6 +5077,14 @@ function resolveModifiedOptions (Ctor) {
 
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
+    // instanceof: 来检测某个对象是不是另一个对象的实例
+    // 判断当前是否是用new 实例化
+    /**
+     * 简单模拟
+     * function instanceof (A, B) {
+     *  return A.__proto__ === b.prototype
+     * }
+    */
     !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword');
@@ -11935,6 +11943,7 @@ Vue.prototype.$mount = function (
       }
     } else if (el) {
       template = getOuterHTML(el);
+      console.log('template', template);
     }
     if (template) {
       /* istanbul ignore if */

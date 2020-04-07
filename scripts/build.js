@@ -4,16 +4,23 @@ const zlib = require('zlib')
 const rollup = require('rollup')
 const terser = require('terser')
 
+// 判断dist文件是否存在，不存在就创建
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
+// 获取所有平台config-rollup配置
 let builds = require('./config').getAllBuilds()
 
-// filter builds via command line arg
+/**
+ * 如果存在脚本上有参数，则过滤出配置中含参数的配置
+ * 否则抛出除了weex的全部配置
+ */
 if (process.argv[2]) {
+  console.log(process.argv[2])
   const filters = process.argv[2].split(',')
   builds = builds.filter(b => {
+    // some返回boolean, 一项为true则返回true
     return filters.some(f => b.output.file.indexOf(f) > -1 || b._name.indexOf(f) > -1)
   })
 } else {
@@ -22,7 +29,12 @@ if (process.argv[2]) {
     return b.output.file.indexOf('weex') === -1
   })
 }
+/**最终
+ * web 编译文件入口为 /src/platforms/web/entry-runtime.js
+ */
+console.log(builds)
 
+// 执行rollup打包
 build(builds)
 
 function build (builds) {
@@ -75,6 +87,7 @@ function write (dest, code, zip) {
     fs.writeFile(dest, code, err => {
       if (err) return reject(err)
       if (zip) {
+        // 文本压缩
         zlib.gzip(code, (err, zipped) => {
           if (err) return reject(err)
           report(' (gzipped: ' + getSize(zipped) + ')')
@@ -94,6 +107,7 @@ function logError (e) {
   console.log(e)
 }
 
+// 蓝色打印
 function blue (str) {
   return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
 }

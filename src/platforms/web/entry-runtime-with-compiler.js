@@ -55,6 +55,7 @@ Vue.prototype.$mount = function (
       }
     } else if (el) {
       template = getOuterHTML(el)
+      console.log('template', template);
     }
     if (template) {
       /* istanbul ignore if */
