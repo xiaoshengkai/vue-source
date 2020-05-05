@@ -10,6 +10,13 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  /**
+   * foo = Object.create(null)： 创建一个纯净度对象
+   * 优点吧：
+   * 1.干净的对象
+   * 2.判断当前存在属性 foo.xxx, 而不用 hasOwnProperty非继承
+   *
+  */
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events

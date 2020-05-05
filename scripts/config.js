@@ -8,7 +8,6 @@ const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
 const featureFlags = require('./feature-flags')
-
 const banner =
   '/*!\n' +
   ` * Vue.js v${version}\n` +

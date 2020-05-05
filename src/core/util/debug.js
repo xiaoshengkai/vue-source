@@ -16,6 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
     .replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
+    console.log('12345678987654321')
     const trace = vm ? generateComponentTrace(vm) : ''
 
     if (config.warnHandler) {

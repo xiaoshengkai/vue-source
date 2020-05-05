@@ -111,8 +111,12 @@
   }
 
   /**
-   * Make a map and return a function for checking if a key
-   * is in that map.
+   * 返回一个入参函数：确认传入的makeMap函数入参中的字符串中是否带有返回入参字符串
+   * 比如：
+   * let foo = 'aaa,bbb'
+   * let use = makeMap(foo)
+   * use('aaa') => true
+   * use('ccc') => undefined
    */
   function makeMap (
     str,
@@ -403,7 +407,7 @@
     devtools: "development" !== 'production',
 
     /**
-     * Whether to record perf
+     * 是否需求开启性能检查
      */
     performance: false,
 
@@ -626,6 +630,7 @@
       .replace(/[-_]/g, ''); };
 
     warn = function (msg, vm) {
+      console.log('12345678987654321');
       var trace = vm ? generateComponentTrace(vm) : '';
 
       if (config.warnHandler) {
@@ -753,6 +758,7 @@
   var targetStack = [];
 
   function pushTarget (target) {
+    // console.log('初始化 -> pushTarget', target)
     targetStack.push(target);
     Dep.target = target;
   }
@@ -991,6 +997,7 @@
       return
     }
     var ob;
+    console.log('初始化 data -> observe __ob__', value.__ob__);
     if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
       ob = value.__ob__;
     } else if (
@@ -1005,6 +1012,7 @@
     if (asRootData && ob) {
       ob.vmCount++;
     }
+    console.log('初始化 data -> observe', ob);
     return ob
   }
 
@@ -2024,6 +2032,7 @@
       mark = function (tag) { return perf.mark(tag); };
       measure = function (name, startTag, endTag) {
         perf.measure(name, startTag, endTag);
+        console.log('性能检查：', name, perf.measure(name, startTag, endTag));
         perf.clearMarks(startTag);
         perf.clearMarks(endTag);
         // perf.clearMeasures(name)
@@ -2042,6 +2051,7 @@
       'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
       'require' // for Webpack/Browserify
     );
+    console.log(allowedGlobals);
 
     var warnNonPresent = function (target, key) {
       warn(
@@ -2068,7 +2078,11 @@
       typeof Proxy !== 'undefined' && isNative(Proxy);
 
     if (hasProxy) {
+      /**
+       * 定义不允许设置的key
+       */
       var isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact');
+      console.log('initProxy', config.keyCodes);
       config.keyCodes = new Proxy(config.keyCodes, {
         set: function set (target, key, value) {
           if (isBuiltInModifier(key)) {
@@ -3755,6 +3769,13 @@
   /*  */
 
   function initEvents (vm) {
+    /**
+     * foo = Object.create(null)： 创建一个纯净度对象
+     * 优点吧：
+     * 1.干净的对象
+     * 2.判断当前存在属性 foo.xxx, 而不用 hasOwnProperty非继承
+     *
+    */
     vm._events = Object.create(null);
     vm._hasHookEvent = false;
     // init parent attached events
@@ -4610,13 +4631,23 @@
 
   /*  */
 
+  /**
+   * 透层代理
+   * 例子：
+   * let a = {
+   *    _aa: {
+   *      aaa: 22
+   *    }
+   * }
+   * proxy(a)
+   * a.aaa => 22
+  */
   var sharedPropertyDefinition = {
     enumerable: true,
     configurable: true,
     get: noop,
     set: noop
   };
-
   function proxy (target, sourceKey, key) {
     sharedPropertyDefinition.get = function proxyGetter () {
       return this[sourceKey][key]
@@ -4626,6 +4657,7 @@
     };
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
+  /**--------------**/
 
   function initState (vm) {
     vm._watchers = [];
@@ -4693,6 +4725,10 @@
 
   function initData (vm) {
     var data = vm.$options.data;
+    console.log('初始化 data -> initData', data);
+    /**
+     * 得到data函数执行后的对象
+     */
     data = vm._data = typeof data === 'function'
       ? getData(data, vm)
       : data || {};
@@ -4704,13 +4740,16 @@
         vm
       );
     }
-    // proxy data on instance
+    // 实例上的代理数据
     var keys = Object.keys(data);
     var props = vm.$options.props;
     var methods = vm.$options.methods;
     var i = keys.length;
     while (i--) {
       var key = keys[i];
+      /**
+       * data定义的字段是否和methods和props定义的重叠
+      */
       {
         if (methods && hasOwn(methods, key)) {
           warn(
@@ -4725,11 +4764,13 @@
           "Use prop default value instead.",
           vm
         );
-      } else if (!isReserved(key)) {
+      } else if (!isReserved(key)) { // 判断key非 _或者$开头
+        /* 指向透层吧：vm.aa => vm._data.aa */
         proxy(vm, "_data", key);
       }
     }
     // observe data
+    // data __o__属性上挂载observe实例
     observe(data, true /* asRootData */);
   }
 
@@ -4737,6 +4778,7 @@
     // #7573 disable dep collection when invoking data getters
     pushTarget();
     try {
+      console.log('初始化 data -> getData', data.call(vm, vm));
       return data.call(vm, vm)
     } catch (e) {
       handleError(e, vm, "data()");
@@ -4954,11 +4996,17 @@
   var uid$2 = 0;
 
   function initMixin (Vue) {
+    console.log('init', Vue);
     Vue.prototype._init = function (options) {
+      console.log('实例化传入的参数_init：', options);
       var vm = this;
       // a uid
       vm._uid = uid$2++;
-
+      /**
+       * mark, measure 对应
+       * Vue api中 performance
+       * 对每次实例化的时候进行一次性能的追踪
+      */
       var startTag, endTag;
       /* istanbul ignore if */
       if ( config.performance && mark) {
@@ -4970,20 +5018,31 @@
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
+      /**
+       * 将vm.constructor。optiones 挂载到 实例化对象vm.$options上
+       */
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        console.log('第一次实例化传入的参数', options, vm.constructor);
+        /**
+         * 解释 vm.constructor
+         * function foo () {}
+         * new foo().constructor === foo => true
+         */
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
           vm
         );
+        console.log('将vm.constructor。optiones 挂载到 实例化对象vm.$options上', vm.$options);
       }
       /* istanbul ignore else */
       {
+        // 如果条件允许，设置 vm._renderProxy = new proxy(vm, handles)
         initProxy(vm);
       }
       // expose real self
@@ -5067,6 +5126,7 @@
   }
 
   function Vue (options) {
+    console.log('实例化传入的参数 Vue', options);
     if (
       // instanceof: 来检测某个对象是不是另一个对象的实例
       // 判断当前是否是用new 实例化
@@ -11888,7 +11948,7 @@
     var el = query(id);
     return el && el.innerHTML
   });
-
+  console.log('来吧--编译时进行');
   var mount = Vue.prototype.$mount;
   Vue.prototype.$mount = function (
     el,

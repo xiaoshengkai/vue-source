@@ -13,11 +13,17 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  console.log('init', Vue)
   Vue.prototype._init = function (options?: Object) {
+    console.log('实例化传入的参数_init：', options)
     const vm: Component = this
     // a uid
     vm._uid = uid++
-
+    /**
+     * mark, measure 对应
+     * Vue api中 performance
+     * 对每次实例化的时候进行一次性能的追踪
+    */
     let startTag, endTag
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -29,20 +35,31 @@ export function initMixin (Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
+    /**
+     * 将vm.constructor。optiones 挂载到 实例化对象vm.$options上
+     */
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      console.log('第一次实例化传入的参数', options, vm.constructor)
+      /**
+       * 解释 vm.constructor
+       * function foo () {}
+       * new foo().constructor === foo => true
+       */
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
       )
+      console.log('将vm.constructor。optiones 挂载到 实例化对象vm.$options上', vm.$options)
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 如果条件允许，设置 vm._renderProxy = new proxy(vm, handles)
       initProxy(vm)
     } else {
       vm._renderProxy = vm

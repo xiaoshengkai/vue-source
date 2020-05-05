@@ -28,13 +28,23 @@ import {
   isReservedAttribute
 } from '../util/index'
 
+/**
+ * 透层代理
+ * 例子：
+ * let a = {
+ *    _aa: {
+ *      aaa: 22
+ *    }
+ * }
+ * proxy(a)
+ * a.aaa => 22
+*/
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
   get: noop,
   set: noop
 }
-
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -44,6 +54,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
+/**--------------**/
 
 export function initState (vm: Component) {
   vm._watchers = []
@@ -111,6 +122,10 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  console.log('初始化 data -> initData', data)
+  /**
+   * 得到data函数执行后的对象
+   */
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
@@ -122,13 +137,16 @@ function initData (vm: Component) {
       vm
     )
   }
-  // proxy data on instance
+  // 实例上的代理数据
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
   while (i--) {
     const key = keys[i]
+    /**
+     * data定义的字段是否和methods和props定义的重叠
+    */
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -143,11 +161,13 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
+    } else if (!isReserved(key)) { // 判断key非 _或者$开头
+      /* 指向透层吧：vm.aa => vm._data.aa */
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // data __o__属性上挂载observe实例
   observe(data, true /* asRootData */)
 }
 
@@ -155,6 +175,7 @@ export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
   try {
+    console.log('初始化 data -> getData', data.call(vm, vm))
     return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)

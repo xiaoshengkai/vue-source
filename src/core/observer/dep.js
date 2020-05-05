@@ -56,6 +56,7 @@ Dep.target = null
 const targetStack = []
 
 export function pushTarget (target: ?Watcher) {
+  // console.log('初始化 -> pushTarget', target)
   targetStack.push(target)
   Dep.target = target
 }

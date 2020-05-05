@@ -100,8 +100,12 @@ export function toNumber (val: string): number | string {
 }
 
 /**
- * Make a map and return a function for checking if a key
- * is in that map.
+ * 返回一个入参函数：确认传入的makeMap函数入参中的字符串中是否带有返回入参字符串
+ * 比如：
+ * let foo = 'aaa,bbb'
+ * let use = makeMap(foo)
+ * use('aaa') => true
+ * use('ccc') => undefined
  */
 export function makeMap (
   str: string,

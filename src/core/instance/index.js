@@ -6,6 +6,7 @@ import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
 function Vue (options) {
+  console.log('实例化传入的参数 Vue', options)
   if (process.env.NODE_ENV !== 'production' &&
     // instanceof: 来检测某个对象是不是另一个对象的实例
     // 判断当前是否是用new 实例化

@@ -104,8 +104,12 @@ function toNumber (val) {
 }
 
 /**
- * Make a map and return a function for checking if a key
- * is in that map.
+ * 返回一个入参函数：确认传入的makeMap函数入参中的字符串中是否带有返回入参字符串
+ * 比如：
+ * let foo = 'aaa,bbb'
+ * let use = makeMap(foo)
+ * use('aaa') => true
+ * use('ccc') => undefined
  */
 function makeMap (
   str,
@@ -772,7 +776,7 @@ var config = ({
   devtools: "development" !== 'production',
 
   /**
-   * Whether to record perf
+   * 是否需求开启性能检查
    */
   performance: false,
 
@@ -858,6 +862,7 @@ var formatComponentName = (noop);
     .replace(/[-_]/g, ''); };
 
   warn = function (msg, vm) {
+    console.log('12345678987654321');
     var trace = vm ? generateComponentTrace(vm) : '';
 
     if (config.warnHandler) {
@@ -985,6 +990,7 @@ Dep.target = null;
 var targetStack = [];
 
 function pushTarget (target) {
+  // console.log('初始化 -> pushTarget', target)
   targetStack.push(target);
   Dep.target = target;
 }
@@ -1133,6 +1139,7 @@ function observe (value, asRootData) {
     return
   }
   var ob;
+  console.log('初始化 data -> observe __ob__', value.__ob__);
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__;
   } else if (
@@ -1147,6 +1154,7 @@ function observe (value, asRootData) {
   if (asRootData && ob) {
     ob.vmCount++;
   }
+  console.log('初始化 data -> observe', ob);
   return ob
 }
 
@@ -6579,12 +6587,17 @@ function renderSSRStyle (
     'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
     'require' // for Webpack/Browserify
   );
+  console.log(allowedGlobals);
 
   var hasProxy =
     typeof Proxy !== 'undefined' && isNative(Proxy);
 
   if (hasProxy) {
+    /**
+     * 定义不允许设置的key
+     */
     var isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact');
+    console.log('initProxy', config.keyCodes);
     config.keyCodes = new Proxy(config.keyCodes, {
       set: function set (target, key, value) {
         if (isBuiltInModifier(key)) {
